@@ -1,0 +1,852 @@
+/* =========================================================
+   Manasi Sharma — portfolio
+   Image-led folds, each carrying its own palette.
+
+   Built mobile-first: the base rules are the phone layout and
+   everything widens at breakpoints, so nothing has to be undone
+   for small screens.
+   ========================================================= */
+
+:root {
+  /* fold palette — replaced at runtime per fold, see lib/theme.js.
+     these are the opening (black) values so the first paint is right */
+  --bg: #0a0a0c;
+  --bg-raised: rgba(247, 245, 243, 0.06);
+  --fg: #f7f5f3;
+  --fg-soft: #7e7d7d;
+  --fg-faint: #7c7b7b;
+  --accent: #e4b363;
+  --line: rgba(247, 245, 243, 0.16);
+  --frame: rgba(247, 245, 243, 0.12);
+  --shadow: 0 40px 90px -34px rgba(0, 0, 0, 0.92);
+
+  /* one spacing scale, used everywhere */
+  --gut: clamp(1.15rem, 5vw, 3.5rem);   /* page gutter        */
+  --fold-y: clamp(4.5rem, 11vh, 7rem);  /* fold top/bottom    */
+  --sec-y: clamp(2rem, 5vw, 3.2rem);    /* section rhythm     */
+  --stack: clamp(1rem, 2.4vw, 1.5rem);  /* between siblings   */
+  --measure: 62ch;                      /* reading width      */
+  --page: 1500px;
+  --read: 960px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --fade: 800ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+::selection { background: var(--accent); color: var(--bg); }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background-color var(--fade), color var(--fade);
+}
+
+h1, h2, h3 {
+  font-family: "Fraunces", ui-serif, Georgia, serif;
+  font-weight: 500;
+  margin: 0;
+  text-wrap: balance;
+  letter-spacing: -0.025em;
+}
+p { text-wrap: pretty; }
+
+a { color: inherit; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+img { max-width: 100%; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* the fold crossfade lives on the properties, since custom
+   properties themselves can't animate */
+h1, h2, h3, p, span, a, li, button, figcaption, td, th {
+  transition: color var(--fade), border-color var(--fade);
+}
+
+.intro, .impact, .slide, .outro, .group-divider, .case-wrap { position: relative; z-index: 1; }
+
+/* =========================================================
+   Fixed chrome
+   ========================================================= */
+.chrome {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--gut);
+  pointer-events: none;
+  /* keeps the bar legible over a bright hero image */
+  background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
+  transition: background var(--fade);
+}
+.chrome > * { pointer-events: auto; }
+.chrome .mark,
+.chrome .to-about {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--fg);
+  /* comfortable tap target without visually enlarging the label */
+  padding: 0.6rem 0;
+}
+.chrome .mark:hover, .chrome .to-about:hover { color: var(--accent); }
+
+@media (min-width: 700px) {
+  .chrome { padding: 1.5rem var(--gut); }
+  .chrome .mark, .chrome .to-about { font-size: 0.72rem; letter-spacing: 0.16em; }
+}
+
+/* progress rail — a thin top bar on phones, a dot column on desktop */
+.rail {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 61;
+  display: flex;
+  gap: 2px;
+  padding: 0;
+  pointer-events: none;
+}
+.rail button {
+  flex: 1;
+  height: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--fg);
+  opacity: 0.16;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: opacity 260ms ease, background 260ms ease;
+}
+.rail button.seen { opacity: 0.4; }
+.rail button.here { opacity: 1; background: var(--accent); }
+.rail__count { display: none; }
+
+@media (min-width: 760px) {
+  .rail {
+    inset: 50% var(--gut) auto auto;
+    left: auto;
+    transform: translateY(-50%);
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+  }
+  .rail button {
+    flex: none;
+    width: 4px;
+    height: 18px;
+    border-radius: 100px;
+    opacity: 0.22;
+  }
+  .rail button:hover { opacity: 0.6; }
+  .rail button.seen { opacity: 0.55; }
+  .rail button.here { height: 34px; }
+  .rail__count {
+    display: block;
+    margin-top: 0.5rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    color: var(--fg-faint);
+    writing-mode: vertical-rl;
+  }
+}
+
+/* =========================================================
+   Hero fold
+   ========================================================= */
+.intro {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  gap: clamp(2rem, 6vw, 4rem);
+  padding: calc(var(--fold-y) + 2rem) var(--gut) var(--fold-y);
+  max-width: var(--page);
+  margin: 0 auto;
+}
+.intro__copy { position: relative; z-index: 2; }
+.kicker {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.2rem;
+}
+.intro h1 {
+  font-size: clamp(3rem, 15vw, 9.5rem);
+  line-height: 0.9;
+  margin-bottom: 1.3rem;
+}
+.say {
+  max-width: 46ch;
+  font-size: clamp(0.98rem, 1.5vw, 1.12rem);
+  color: var(--fg-soft);
+  margin: 0 0 0.85rem;
+}
+.say:last-of-type { margin-bottom: 0; }
+
+/* discipline list — a quiet label line, not a heading */
+.intro__disciplines {
+  margin-top: 2rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  line-height: 1.9;
+  max-width: 34ch;
+}
+
+/* sits under the portrait, deliberately smaller than the body copy so it
+   reads as an aside rather than a fourth paragraph */
+.intro__now {
+  margin: 1.1rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--fg-faint);
+  max-width: 30ch;
+}
+/* the opening line is the thesis — it carries in the display face */
+.say--lead {
+  font-family: "Fraunces", ui-serif, Georgia, serif;
+  font-size: clamp(1.3rem, 2.6vw, 1.85rem);
+  line-height: 1.25;
+  color: var(--fg);
+  margin-bottom: 1.1rem;
+  max-width: 22ch;
+}
+.intro__visual { position: relative; max-width: 260px; }
+
+/* Side by side as early as possible: stacked, the portrait falls below the
+   first screen and the opening fold reads as text-only — which is what a
+   narrow embed or a small laptop was getting. */
+@media (min-width: 680px) {
+  .intro {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.62fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 4rem);
+  }
+  .intro__visual { max-width: none; }
+}
+@media (min-width: 1100px) {
+  .intro { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.7fr); }
+  }
+
+/* Below that it stacks, so the type has to give the photo room to sit
+   within the first screen rather than under it. */
+@media (max-width: 679px) {
+  .intro { gap: 1.6rem; padding-top: calc(var(--fold-y) + 1rem); }
+  .intro h1 { font-size: clamp(2.6rem, 13vw, 3.6rem); margin-bottom: 1rem; }
+  .say { font-size: 0.98rem; }
+    .intro__visual { max-width: 210px; }
+}
+
+/* =========================================================
+   By the numbers
+   ========================================================= */
+/* top rule only — the bottom one landed immediately above the next
+   section's own divider rule and read as a double line */
+.impact { background: transparent; border-top: 1px solid var(--line); }
+.impact__inner {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: clamp(3.2rem, 9vw, 6rem) var(--gut);
+}
+.impact__head { max-width: var(--measure); }
+.section-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.impact__head h2 {
+  font-size: clamp(1.9rem, 5.5vw, 3.6rem);
+  line-height: 1;
+  margin: 1rem 0 0;
+}
+.impact__figures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.6rem, 4vw, 2.5rem);
+  margin-top: clamp(2.4rem, 6vw, 3.6rem);
+  padding-top: clamp(1.8rem, 4vw, 2.4rem);
+  border-top: 1px solid var(--line);
+}
+.fig__v {
+  display: block;
+  font-family: "Fraunces", serif;
+  font-size: clamp(1.9rem, 7vw, 3.2rem);
+  line-height: 1;
+  color: var(--accent);
+}
+.fig__u {
+  display: block;
+  margin-top: 0.55rem;
+  font-size: 0.88rem;
+  color: var(--fg-soft);
+  line-height: 1.45;
+  max-width: 24ch;
+}
+@media (min-width: 860px) { .impact__figures { grid-template-columns: repeat(4, 1fr); } }
+
+/* =========================================================
+   Group divider
+   ========================================================= */
+.group-divider {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 4.5rem) var(--gut) 0;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.group-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+/* =========================================================
+   Project fold
+   ========================================================= */
+.slide {
+  display: grid;
+  gap: clamp(2rem, 6vw, 4.5rem);
+  align-items: center;
+  padding: var(--fold-y) var(--gut);
+  max-width: var(--page);
+  margin: 0 auto;
+}
+.slide__copy { position: relative; z-index: 3; }
+.slide__index {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--fg-faint);
+  margin-bottom: 1rem;
+}
+.slide__award { color: var(--accent); }
+.slide h2 {
+  font-size: clamp(2.4rem, 10vw, 5.6rem);
+  line-height: 0.94;
+  margin-bottom: 0.7rem;
+}
+.slide__where {
+  font-size: 0.95rem;
+  color: var(--fg-faint);
+  margin-bottom: 1.1rem;
+}
+.slide__line {
+  max-width: 36ch;
+  color: var(--fg-soft);
+  font-size: clamp(0.98rem, 1.35vw, 1.1rem);
+  margin: 0 0 1.7rem;
+}
+.slide__metric {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  margin-bottom: 1.9rem;
+  flex-wrap: wrap;
+}
+.slide__metric .v {
+  font-family: "Fraunces", serif;
+  font-size: clamp(1.9rem, 6vw, 3rem);
+  line-height: 1;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.slide__metric .u {
+  font-size: 0.83rem;
+  color: var(--fg-soft);
+  max-width: 20ch;
+  line-height: 1.45;
+}
+/* The one action on each fold, so it carries weight: a bordered pill
+   rather than a small underlined label. */
+.slide__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--fg);
+  padding: 0.85rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease, gap 200ms ease;
+}
+.slide__cta:hover {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+  gap: 1.05rem;
+}
+@media (min-width: 920px) { .slide__cta { font-size: 0.86rem; padding: 0.95rem 1.7rem; } }
+
+@media (min-width: 920px) {
+  .slide {
+    min-height: 100svh;
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  }
+}
+
+/* =========================================================
+   The plate
+   ========================================================= */
+.slide__visual { position: relative; }
+.plate {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-raised);
+  /* Self-contained polygon rather than clip-path: url(#svg-id).
+     A url() reference resolves against the document base URL, and in a
+     sandboxed/embedded context it can fail to resolve — at which point the
+     spec says the element is clipped to nothing, so the image vanishes
+     entirely rather than merely losing its curve. The polygon samples the
+     same bezier and cannot break that way. */
+  clip-path: polygon(0.00% 2.20%, 12.42% 1.68%, 24.91% 1.24%, 37.44% 0.87%, 50.00% 0.57%, 62.56% 0.34%, 75.09% 0.17%, 87.58% 0.06%, 100.00% 0.00%, 100.00% 97.80%, 87.58% 98.32%, 75.09% 98.76%, 62.56% 99.13%, 50.00% 99.42%, 37.44% 99.66%, 24.91% 99.83%, 12.42% 99.94%, 0.00% 100.00%);
+  filter: drop-shadow(0 24px 50px rgba(0, 0, 0, 0.45));
+}
+/* The artwork comes in several ratios (16:9, 3:2, portrait certificates).
+   Rather than force one and crop, the image sets the plate's height from
+   its own proportions, so every piece is shown whole. */
+.plate img { width: 100%; height: auto; display: block; }
+.plate--portrait { clip-path: polygon(1.80% 0.00%, 1.39% 12.42%, 1.04% 24.91%, 0.76% 37.44%, 0.53% 50.00%, 0.34% 62.56%, 0.20% 75.09%, 0.09% 87.58%, 0.00% 100.00%, 98.20% 100.00%, 98.61% 87.58%, 98.96% 75.09%, 99.24% 62.56%, 99.48% 50.00%, 99.66% 37.44%, 99.80% 24.91%, 99.91% 12.42%, 100.00% 0.00%); }
+/* only a plate with nothing in it needs a ratio of its own */
+.plate--empty { aspect-ratio: 16 / 9; }
+.plate--portrait.plate--empty { aspect-ratio: 4 / 5; }
+
+/* the 3D tilt: perspective on the parent so it rotates in space */
+.slide__visual { perspective: 1600px; perspective-origin: 50% 50%; }
+.tilt { transform-style: preserve-3d; will-change: transform; }
+.plate img { will-change: transform; }
+
+.plate-stack { position: static; width: 62%; margin-top: 1.2rem; z-index: 4; }
+@media (min-width: 920px) {
+  .plate-stack { position: absolute; right: 1%; bottom: -13%; width: 34%; margin-top: 0; }
+}
+
+/* placeholder, until artwork exists */
+.plate--empty {
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 14px, rgba(127, 127, 127, 0.05) 14px 28px),
+    var(--bg-raised);
+}
+.ph { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(1rem, 2.4vw, 1.9rem); }
+.ph__corner { position: absolute; width: 18px; height: 18px; border: 1px solid var(--accent); opacity: 0.5; }
+.ph__corner--tl { top: 12px; left: 12px; border-right: 0; border-bottom: 0; }
+.ph__corner--br { bottom: 12px; right: 12px; border-left: 0; border-top: 0; }
+.ph__body { margin: auto 0; max-width: 32ch; }
+.ph__kind { display: block; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); }
+.ph__project { display: block; font-family: "Fraunces", serif; font-size: clamp(1.15rem, 2.6vw, 1.9rem); color: var(--fg); margin-top: 0.45rem; letter-spacing: -0.02em; }
+.ph__note { margin: 0.6rem 0 0; font-size: 0.82rem; line-height: 1.5; color: var(--fg-soft); }
+.ph__spec { display: flex; flex-wrap: wrap; gap: 0.25rem 1.1rem; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.66rem; color: var(--fg-faint); }
+.ph__file { color: var(--fg-soft); }
+.plate-stack .ph__note { display: none; }
+
+/* =========================================================
+   Closing
+   ========================================================= */
+.outro {
+  display: grid;
+  align-content: center;
+  gap: 0;
+  padding: clamp(4rem, 12vh, 7rem) var(--gut);
+  max-width: var(--page);
+  margin: 0 auto;
+  border-top: 1px solid var(--line);
+}
+.outro h2 { font-size: clamp(2.2rem, 9vw, 4.6rem); line-height: 1; margin-bottom: 1.8rem; }
+.outro .links { display: flex; flex-wrap: wrap; gap: 0.5rem 2.2rem; }
+.outro .links a {
+  text-decoration: none;
+  font-size: 0.98rem;
+  color: var(--fg-soft);
+  border-bottom: 1px solid var(--line);
+  padding: 0.4rem 0;
+}
+.outro .links a:hover { color: var(--accent); border-color: var(--accent); }
+.outro .fine { margin-top: 2.4rem; font-size: 0.76rem; color: var(--fg-faint); }
+@media (min-width: 700px) { .outro { min-height: 70svh; } }
+
+/* =========================================================
+   Case study page
+   ========================================================= */
+.case-wrap { max-width: var(--read); margin: 0 auto; padding: 0 var(--gut); }
+
+.case-header { padding: calc(var(--fold-y) + 2rem) 0 var(--sec-y); }
+.backlink {
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--fg-faint);
+  /* block, so an award pill below it starts on its own line
+     instead of colliding with it inline */
+  display: block;
+  width: fit-content;
+  padding: 0.5rem 0;
+  margin-bottom: 1.2rem;
+}
+.backlink:hover { color: var(--accent); }
+.case-award {
+  display: inline-block;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 100px;
+  padding: 0.32rem 0.75rem;
+  margin-bottom: 1.2rem;
+}
+.case-header h1 {
+  font-size: clamp(2rem, 8vw, 4rem);
+  line-height: 1.02;
+  margin: 0 0 0.9rem;
+  max-width: 18ch;
+}
+.case-header .ctx { color: var(--fg-soft); font-size: 1.12rem; margin: 0; max-width: 52ch; }
+.case-tags { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 1.3rem 0 0; padding: 0; }
+.case-tags li {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 0.3rem 0.65rem;
+}
+
+.case-figure { margin: var(--sec-y) 0 0; }
+.case-figure figcaption { margin-top: 0.8rem; font-size: 0.78rem; color: var(--fg-faint); }
+
+.case-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.8rem 1.5rem;
+  padding: var(--sec-y) 0;
+  border-block: 1px solid var(--line);
+  margin-top: var(--sec-y);
+}
+.case-metrics .m .v {
+  font-family: "Fraunces", serif;
+  font-size: clamp(1.5rem, 5vw, 2.3rem);
+  line-height: 1;
+  color: var(--accent);
+  display: block;
+}
+.case-metrics .m .u { font-size: 0.86rem; color: var(--fg-soft); max-width: 22ch; display: block; margin-top: 0.4rem; line-height: 1.45; }
+@media (min-width: 760px) { .case-metrics { display: flex; flex-wrap: wrap; gap: 2.2rem 3.2rem; } }
+
+.case-section {
+  padding: var(--sec-y) 0;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 0.6rem;
+}
+.case-section .k {
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+}
+.case-section .body { max-width: var(--measure); color: var(--fg-soft); font-size: 1.02rem; }
+.case-section .body p { margin: 0 0 1.05rem; }
+.case-section .body p:last-child { margin-bottom: 0; }
+.case-section .body ul { padding-left: 1.1rem; margin: 0.4rem 0 1rem; }
+.case-section .body li { margin: 0.5rem 0; }
+.case-section .note { font-size: 0.84rem; color: var(--fg-faint); font-style: italic; margin: 1rem 0 0; max-width: var(--measure); }
+@media (min-width: 760px) {
+  .case-section { grid-template-columns: 160px 1fr; gap: 1.6rem; }
+  .case-section .k { padding-top: 0.35rem; }
+  .case-section .note { grid-column: 2; }
+}
+
+/* Certificates and award photos, presented as framed documents.
+
+   These arrive in every orientation (tall certificates, a landscape
+   letter, a portrait photo). Rather than force them into the fold's
+   plate shape — which crops and warps a document — each sits matted
+   and centred inside a frame, capped by height so a tall certificate
+   can't dominate the page. */
+.case-proof {
+  margin: var(--sec-y) auto 0;
+  max-width: 560px;
+}
+.plate--proof {
+  clip-path: none;
+  filter: none;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.7rem, 2.2vw, 1.25rem);
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  box-shadow: 0 18px 44px -22px rgba(0, 0, 0, 0.5);
+}
+.plate--proof img {
+  width: auto;
+  max-width: 100%;
+  max-height: 58vh;
+  border-radius: 2px;
+  /* documents are almost always on white — a hairline keeps the page
+     from bleeding into the paper */
+  box-shadow: 0 0 0 1px rgba(127, 127, 127, 0.22);
+}
+.case-proof figcaption {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--fg-faint);
+  text-align: center;
+  max-width: 46ch;
+  margin-inline: auto;
+  line-height: 1.5;
+}
+
+.case-nav {
+  display: grid;
+  gap: 1.6rem;
+  padding: clamp(2.2rem, 6vw, 3rem) 0;
+}
+.case-nav a { text-decoration: none; }
+.case-nav .dir { display: block; font-size: 0.64rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--fg-faint); margin-bottom: 0.35rem; font-weight: 600; }
+.case-nav .nm { font-family: "Fraunces", serif; font-size: 1.15rem; color: var(--fg); }
+.case-nav a:hover .nm { color: var(--accent); }
+@media (min-width: 620px) {
+  .case-nav { grid-template-columns: 1fr 1fr; }
+  .case-nav .to { text-align: right; }
+}
+
+/* =========================================================
+   Interactive prototypes
+   ========================================================= */
+.proto { padding: var(--sec-y) 0; border-bottom: 1px solid var(--line); }
+.proto__head { display: grid; gap: 0.5rem; margin-bottom: 1.3rem; }
+.proto__head .k { font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.proto__intro { margin: 0; color: var(--fg-soft); font-size: 1rem; max-width: 52ch; }
+@media (min-width: 760px) {
+  .proto__head { grid-template-columns: 160px 1fr; gap: 1.6rem; }
+  .proto__head .k { padding-top: 0.3rem; }
+}
+
+.proto__tabs { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.1rem; }
+.proto__tabs button {
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--fg-soft);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+.proto__tabs button:hover { color: var(--accent); border-color: var(--accent); }
+.proto__tabs button.on { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+.proto__frame {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--frame);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-raised);
+}
+.proto__frame iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+.proto__frame--desktop { aspect-ratio: 4 / 3; }
+.proto__frame--phone { aspect-ratio: 10 / 16; max-width: 360px; margin-inline: auto; }
+@media (min-width: 760px) { .proto__frame--desktop { aspect-ratio: 16 / 10; } }
+
+.proto__start {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.45rem;
+  width: 100%; height: 100%; min-height: 240px;
+  font-family: inherit; color: var(--fg);
+  background: repeating-linear-gradient(-45deg, transparent 0 14px, rgba(127,127,127,0.05) 14px 28px);
+  border: 0; cursor: pointer;
+}
+.proto__play {
+  display: grid; place-items: center;
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 1px solid var(--accent); color: var(--accent);
+  font-size: 0.78rem; padding-left: 3px;
+  transition: background 200ms ease, color 200ms ease;
+}
+.proto__start:hover .proto__play { background: var(--accent); color: var(--bg); }
+.proto__startlabel { font-family: "Fraunces", serif; font-size: 1.15rem; }
+.proto__starthint { font-size: 0.74rem; color: var(--fg-faint); }
+
+.proto__meta { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 0.9rem; flex-wrap: wrap; }
+.proto__caption { margin: 0; font-size: 0.83rem; color: var(--fg-faint); max-width: 58ch; }
+.proto__out { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: var(--accent); text-decoration: none; white-space: nowrap; padding: 0.4rem 0; }
+.proto__out:hover { text-decoration: underline; }
+
+/* =========================================================
+   Working pages: /images and /palette
+   ========================================================= */
+.plan, .pal { max-width: 1180px; margin: 0 auto; padding: calc(var(--fold-y) + 1rem) var(--gut) 5rem; }
+.plan__head, .pal__head { max-width: 60ch; margin-bottom: 2.4rem; }
+.plan__head h1, .pal__head h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 1.2rem 0 0.8rem; }
+.plan__head p, .pal__head p { color: var(--fg-soft); margin: 0 0 0.8rem; font-size: 0.95rem; }
+.plan__head code { font-family: "IBM Plex Mono", monospace; font-size: 0.86em; color: var(--accent); background: var(--bg-raised); padding: 0.15em 0.4em; border-radius: 3px; }
+
+.plan__table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.plan__table th { text-align: left; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-faint); padding: 0 0 0.8rem; border-bottom: 1px solid var(--line); }
+.plan__table td { padding: 1rem 1rem 1rem 0; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--fg-soft); }
+.plan__table td:first-child { font-family: "Fraunces", serif; font-size: 1.02rem; color: var(--fg); }
+.plan__kind { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.plan__file { font-family: "IBM Plex Mono", monospace; font-size: 0.76rem; color: var(--fg); }
+.plan__size { font-family: "IBM Plex Mono", monospace; font-size: 0.74rem; color: var(--fg-faint); }
+.plan__done { color: var(--accent); font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 600; }
+.plan__todo { color: var(--fg-faint); font-size: 0.72rem; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 600; }
+@media (max-width: 720px) {
+  .plan__table, .plan__table tbody, .plan__table tr, .plan__table td { display: block; width: 100%; }
+  .plan__table thead { display: none; }
+  .plan__table tr { border-bottom: 1px solid var(--line); padding: 1rem 0; }
+  .plan__table td { border: 0; padding: 0.12rem 0; }
+}
+
+.pal__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+@media (min-width: 900px) { .pal__grid { grid-template-columns: repeat(5, 1fr); } }
+.sw { border: 1px solid rgba(127,127,127,0.25); border-radius: 3px; padding: 0.8rem; min-height: 128px; display: flex; flex-direction: column; justify-content: space-between; }
+.sw__top { display: flex; align-items: baseline; gap: 0.5rem; }
+.sw__n { font-family: "IBM Plex Mono", monospace; font-size: 0.6rem; }
+.sw__name { font-family: "Fraunces", serif; font-size: 0.92rem; line-height: 1.15; }
+.sw__hex { font-family: "IBM Plex Mono", monospace; font-size: 0.64rem; margin-top: 0.55rem; }
+.sw__ratios { display: flex; gap: 0.5rem; font-family: "IBM Plex Mono", monospace; font-size: 0.66rem; margin-top: 0.3rem; }
+.pal__shapes { display: grid; gap: 2rem; margin-top: 2.4rem; }
+@media (min-width: 900px) { .pal__shapes { grid-template-columns: 1fr 0.6fr 0.3fr; align-items: start; } }
+.pal__shapes figure { margin: 0; }
+.pal__shapes figcaption { margin-top: 0.65rem; font-size: 0.74rem; color: var(--fg-faint); }
+.rail--static { position: static; transform: none; flex-direction: column; gap: 0.55rem; inset: auto; }
+.rail--static span { width: 4px; height: 18px; border-radius: 100px; background: var(--fg); opacity: 0.22; display: block; }
+.rail--static span.seen { opacity: 0.55; }
+.rail--static span.here { opacity: 1; height: 34px; background: var(--accent); }
+
+/* =========================================================
+   Motion preferences
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================
+   Sector strip
+   Sits between the hero and the numbers, on the hero's colour —
+   deliberately not a rail stop, since it's a strip, not a destination.
+   ========================================================= */
+.sectors-strip { border-top: 1px solid var(--line); }
+.sectors-strip__inner {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: clamp(2.4rem, 6vw, 3.6rem) var(--gut);
+}
+.sectors-strip__list {
+  list-style: none;
+  margin: 1.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1.5rem 1.2rem;
+  grid-template-columns: 1fr 1fr;
+}
+.sectors-strip__list li {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.sectors-strip__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--accent);
+  align-self: center;
+}
+.sectors-strip__icon svg { width: 23px; height: 23px; }
+.sectors-strip__label {
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--fg);
+}
+
+@media (min-width: 620px) {
+  .sectors-strip__list { grid-template-columns: repeat(3, 1fr); gap: 1.8rem; }
+}
+@media (min-width: 1000px) {
+  .sectors-strip__list { grid-template-columns: repeat(5, 1fr); gap: 1.6rem; }
+}
+.proto__start--blocked { text-decoration: none; }
+.proto__url {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--fg-faint);
+  margin-top: 0.5rem;
+  word-break: break-all;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+/* =========================================================
+   Hero shader
+   The canvas is inset to the content area rather than bled to the
+   viewport, so the shader's outline frames the hero's contents and
+   clears the fixed nav instead of running under it.
+   ========================================================= */
+.intro__shader {
+  position: absolute;
+  /* Horizontally the frame must sit OUTSIDE the content gutter, or the
+     vertical lines run through the left edge of the type — the gutter is
+     clamp(1.15rem, 5vw, 3.5rem), so this stays well inside it. */
+  inset: clamp(3.5rem, 9vh, 6rem) clamp(0.4rem, 1.2vw, 1rem)
+         clamp(2.5rem, 7vh, 4.5rem);
+  z-index: 0;
+  pointer-events: none;
+  /* no mask needed: the shader's ground colour is the hero's own #0A0A0C,
+     so the canvas edge is invisible against the fold */
+  opacity: 0.9;
+}
+.intro__shader-canvas { width: 100%; height: 100%; }
+/* content rides above it */
+.intro__copy { z-index: 2; }
+.intro__visual { z-index: 2; }
+
+@media (max-width: 679px) {
+  /* a full-screen WebGL canvas is the wrong trade on a phone: more battery
+     and heat than the effect is worth at that size */
+  .intro__shader { display: none; }
+}
