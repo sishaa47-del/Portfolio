@@ -7,8 +7,8 @@
 export const projects = [
   {
     slug: "restroworks",
-    tag: "Product Marketing · Positioning · GTM · Live",
-    tags: ["Product Marketing", "Positioning", "GTM", "Live"],
+    tag: "Brand Strategy · Positioning · GTM · Competitive Strategy · Sales Enablement",
+    tags: ["Brand Strategy", "Positioning", "GTM", "Competitive Strategy", "Sales Enablement"],
     title: "Rebuilding the Brand Behind a Platform Pivot",
     context:
       "Product Marketing Manager · Restroworks · Aug 2023 – Oct 2024 · Restaurant technology, enterprise B2B SaaS",
@@ -24,27 +24,33 @@ export const projects = [
       "Fastest Debutant, Restroworks Achievers Awards 2024 — certificate and trophy.",
     sections: [
       {
-        label: "The Situation",
+        label: "The Challenge",
         body: [
-          "Restroworks was moving from a single point-of-sale product to a unified restaurant technology platform — the Posist → Restroworks rebrand — but the brand, the website and the sales narrative all still described the old, narrower company. Enterprise buyers were being asked to trust a platform from a business that still presented itself as a POS vendor.",
+          "Posist was becoming Restroworks — but the market story hadn't caught up. The business was moving from a single point-of-sale product to a unified restaurant technology platform, while the brand, the website and the sales narrative all still described the old, narrower company.",
+          "The task: make the new Restroworks proposition clear, differentiated and credible to enterprise buyers.",
         ],
       },
       {
-        label: "The Approach",
+        label: "What I Did",
         body: [
-          "Core PMM work: built CEO, COO and CTO buyer personas from scratch, mapping each one's decision authority, migration fears, and what would actually move them. Ran a competitive-positioning programme by name against the category incumbents — Oracle, NCR, Toast, Square, TouchBistro, Lightspeed, Restaurant365 and Revel Systems.",
-          "Built the sales enablement library on a repeatable ROI-case-study methodology: a structured interview framework — challenges → implementation → measurable impact → testimonial — run against named enterprise accounts.",
-          "Beyond PMM: led the end-to-end website rebuild, from wireframing and copy through navigation and information architecture, delivering 40+ product and marketing pages in three months with a lean three-to-four person team. Alongside it, rebuilt the HubSpot foundation with new lifecycle stages and demographic and behavioural lead scoring, led the Restroworks Marketplace build, and owned the blog programme end to end.",
+          "Repositioned around the buyer — built CEO, COO and CTO personas from scratch, mapping decision drivers, pain points and platform evaluation criteria.",
+          "Built the competitive story — ran a positioning programme by name against 8 category incumbents (Oracle, NCR, Toast, Square, TouchBistro, Lightspeed, Restaurant365 and Revel Systems), translating competitive intelligence into 30 head-to-head pages for prospects and sales teams.",
+          "Turned customers into proof — built an ROI case-study framework (Challenge → Implementation → Impact → Testimonial) and applied it across 5 enterprise accounts, including Nando's India, Tresind, Go Stops, BWC and LBF.",
+          "Made the new brand tangible — led the website rebuild across IA, wireframes, messaging, copy and page production, delivering 40+ pages in three months with a lean 3–4 person team. Alongside it, rebuilt the HubSpot foundation with new lifecycle stages and lead scoring, led the Marketplace build, and owned the organic content programme.",
         ],
       },
       {
-        label: "The Result",
-        body: [
-          "The repositioning moved from strategy into the market across the key buyer touchpoints. The competitive programme delivered 30 planned head-to-head pages across 8 named competitors, while the website rebuild replaced the legacy Posist-era experience with a platform story built around Restroworks.",
-          "The sales enablement programme turned 5 enterprise accounts — including Nando's India, Tresind, Go Stops, BWC and LBF — into published ROI-led case studies, giving sales customer proof they could use in enterprise conversations.",
-          "The HubSpot rebuild introduced a clearer lifecycle-stage structure and demographic and behavioural lead scoring, giving sales a more systematic way to identify and prioritise ready-to-work contacts. The Marketplace launched 59 of 60 planned integration pages, spanning 8 categories across 4 regions.",
+        label: "The Impact",
+        stats: [
+          { v: "22.7×", k: "organic search growth — 257 to 5,831 monthly users" },
+          { v: "39% → 72%", k: "share of total site traffic from organic search" },
+          { v: "22.5%", k: "lead → opportunity conversion — 1,674 to 376" },
         ],
-        note: "Recognition: Fastest Debutant, Restroworks Technologies, 2024.",
+        body: [
+          "The repositioning moved beyond messaging into the full buyer experience — from discovery and differentiation to proof and conversion. The Marketplace launched 59 of 60 planned integration pages, spanning 8 categories across 4 regions.",
+          "“The goal wasn’t to make Restroworks look different. It was to make the new company believable.”",
+        ],
+        note: "Recognition: Fastest Debutant — Restroworks Achievers Awards 2024.",
       },
     ],
   },

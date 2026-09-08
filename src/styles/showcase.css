@@ -575,6 +575,29 @@ h1, h2, h3, p, span, a, li, button, figcaption, td, th {
   color: var(--accent);
   font-weight: 600;
 }
+.case-section .body .stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2.4rem;
+  margin: 0 0 1.4rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--line);
+}
+.case-section .body .stats .v {
+  font-family: "Fraunces", serif;
+  font-size: clamp(1.3rem, 4vw, 1.9rem);
+  line-height: 1;
+  color: var(--accent);
+  display: block;
+}
+.case-section .body .stats .u {
+  font-size: 0.82rem;
+  color: var(--fg-soft);
+  max-width: 20ch;
+  display: block;
+  margin-top: 0.35rem;
+  line-height: 1.42;
+}
 .case-section .body { max-width: var(--measure); color: var(--fg-soft); font-size: 1.02rem; }
 .case-section .body p { margin: 0 0 1.05rem; }
 .case-section .body p:last-child { margin-bottom: 0; }

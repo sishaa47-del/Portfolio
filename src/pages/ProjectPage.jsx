@@ -106,6 +106,16 @@ export default function ProjectPage() {
             <motion.section className="case-section" key={s.label} {...rise()}>
               <span className="k">{s.label}</span>
               <div className="body">
+                {s.stats?.length > 0 && (
+                  <div className="stats">
+                    {s.stats.map((st) => (
+                      <div className="m" key={st.k}>
+                        <span className="v tnum">{st.v}</span>
+                        <span className="u">{st.k}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {s.body.map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}

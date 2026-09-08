@@ -22,8 +22,8 @@ export const slides = [
     title: "Restroworks",
     award: null,
     where: "Product Marketing Manager · Aug 2023 – Oct 2024",
-    line: "Rebuilding the brand behind a platform pivot — Posist to Restroworks, POS to platform.",
-    metric: { value: "40+", unit: "pages rebuilt end to end in three months, with a team of 3–4" },
+    line: "From POS to platform. From Posist to Restroworks. Led the brand repositioning, product narrative and GTM experience behind the transition to an enterprise restaurant technology platform.",
+    metric: { value: "22.7×", unit: "organic search growth · 72% traffic share · 22.5% lead → opportunity conversion" },
     theme: {
       // given #755DA2; darkened to hold white type, hue and saturation kept
       bg: "#524171", fg: "#F7F5F3", soft: "#C4BDCB", faint: "#BFB8C7", accent: "#E4B363",
